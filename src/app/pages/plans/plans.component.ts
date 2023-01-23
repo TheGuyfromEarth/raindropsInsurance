@@ -3,6 +3,7 @@ import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from
 import { PlanService } from '../../service/plan.service';
 import { BookingService } from '../../service/booking.servicec';
 import { Booking } from '../../models/booking.model';
+import { Plan } from 'src/app/models/plan.model';
 declare var window: any;
 
 @Component({
@@ -29,7 +30,8 @@ export class PlansComponent implements OnInit {
   discount: number = 1;
   discountedPrice: number = 0;
   showSubmit: boolean = false;
-
+  selectedPlan: any = {};
+  
   constructor(
     private plans: PlanService,
     private bookingService: BookingService,
@@ -39,7 +41,7 @@ export class PlansComponent implements OnInit {
   ngOnInit(): void {
     // this.getPlans();
     this.loadPersonalInfoForm();
-    for (let i = 1; i < 6; i++){
+    for (let i = 1; i < 6; i++) {
       this.questions[i] = new window.bootstrap.Modal(
         document.getElementById('question' + i)
       );
@@ -53,7 +55,7 @@ export class PlansComponent implements OnInit {
       diseases: ['', Validators.required],
       physical_activity: ['', Validators.required],
       smoke: ['', Validators.required],
-      alcohol: ['', { validators: [Validators.required],  updateOn: 'change' }],
+      alcohol: ['', { validators: [Validators.required], updateOn: 'change' }],
       name: ['', Validators.required],
       city: ['', Validators.required],
       phone: ['', [Validators.required]],
@@ -65,7 +67,7 @@ export class PlansComponent implements OnInit {
       cardNumber: ['', Validators.required],
       premiumAmt: ['', Validators.required],
       paymentFreq: ['', Validators.required]
-    }, );
+    },);
   }
 
   get bookingControl(): { [key: string]: AbstractControl; } {
@@ -73,9 +75,9 @@ export class PlansComponent implements OnInit {
   }
 
   changeModal(i: number) {
-    if(i > 1)
-    this.questions[i-1].hide();
-    if(i < 6){
+    if (i > 1)
+      this.questions[i - 1].hide();
+    if (i < 6) {
       this.questions[i].show();
     } else {
       this.getPlans();
@@ -84,32 +86,30 @@ export class PlansComponent implements OnInit {
   }
 
 
-  onSubmitStep1(planIndex: number) {
+  onSubmitStep1(selectedPlan: any) {
     const today = new Date();
     const year = today.getFullYear();
     const month = today.getMonth();
     const day = today.getDate();
-    const validity= new Date(year + 1, month, day).toISOString().substring(0,10);
-    
-    const planName = this.plansList[planIndex].planName;
-    const premiumAmt = this.plansList[planIndex].baseAmt - (this.plansList[planIndex].baseAmt * this.discount/100);
-    this.booking.controls['planName'].setValue(planName);
-    this.booking.controls['premiumAmt'].setValue(premiumAmt); 
+    const validity = new Date(year + 1, month, day).toISOString().substring(0, 10);
+
+    this.booking.controls['planName'].setValue(selectedPlan.planName);
+    this.booking.controls['premiumAmt'].setValue(selectedPlan.premiumAmt);
     this.booking.controls['validity'].setValue(validity);
     this.step = 2;
   }
 
   onSubmitStep2() {
     this.submittedStep3 = true;
-    
-    if(this.booking.valid){
+
+    if (this.booking.valid) {
       this.bookingService.bookingAdd(this.booking.value).subscribe(res => {
         this.finalData = res;
         this.step = 3;
         this.showSuccess = true;
         console.log(res);
         this.showError = false;
-        
+
       });
     } else {
       this.showError = true;
@@ -117,25 +117,37 @@ export class PlansComponent implements OnInit {
   }
 
   getPlans() {
-    if(this.booking.controls['below_30'].value == 'No')
+    if (this.booking.controls['below_30'].value == 'No')
       this.discount += .05;
 
-    if(this.booking.controls['diseases'].value == 'Yes')
+    if (this.booking.controls['diseases'].value == 'Yes')
       this.discount += .01;
 
-    if(this.booking.controls['physical_activity'].value == 'No')
+    if (this.booking.controls['physical_activity'].value == 'No')
       this.discount += .05;
 
-    if(this.booking.controls['smoke'].value == 'Yes')
+    if (this.booking.controls['smoke'].value == 'Yes')
       this.discount += .2;
 
-    if(this.booking.controls['alcohol'].value == 'Yes')
+    if (this.booking.controls['alcohol'].value == 'Yes')
       this.discount += .2;
-      console.log(this.discount, this.booking.value);
-       
+    console.log(this.discount, this.booking.value);
+
     this.plans.getPlan().subscribe((res: any) => {
       this.plansList = res;
     });
   }
+
+  // View Plan Details - Modal
+  viewPlanDetails(planId: any) {
+
+    this.plans.getPlanDetails(planId).subscribe((res: Plan) => {
+      this.selectedPlan = res;
+      this.selectedPlan.premiumAmt = this.selectedPlan.baseAmt * this.discount;
+      var planDetailsModal = new window.bootstrap.Modal(document.getElementById('planDetailsModal'));
+      planDetailsModal.show();
+    });
+  }
+
 
 }

@@ -30,10 +30,9 @@
                                     <div class="h4 fw-bolder">
                                         INR. {{ plan.baseAmt * discount }}
                                     </div>
-                                    <div class="text-muted"><s>INR. {{ plan.baseAmt }}</s></div>
-                                    <button type="button" (click)="onSubmitStep1( i )"
-                                        class="btn btn-outline-primary">Buy
-                                        Now</button>
+                                    <div class="text-muted"><s>INR. {{ plan.baseAmt * 2 }}</s></div>
+                                        <button type="button" (click)="viewPlanDetails(plan.id)"
+                                        class="btn btn-outline-primary">View More</button>
                                 </div>
                             </div>
                         </div>
@@ -326,4 +325,30 @@
             </div>
         </div>
     </div>
+    <!-- Plan Details Modal -->
+    <div class="modal fade" id="planDetailsModal" tabindex="-1" aria-labelledby="planDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="planDetailsModalLabel">Plan Details</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                    <h5 class="card-title border-bottom pb-2">{{selectedPlan.planName}}</h5>
+                    <p class="card-text">{{selectedPlan.description}}</p>
+                    <div class="float-end">
+                        <div class="h4 fw-bolder">
+                            INR. {{ selectedPlan.premiumAmt }}
+                        </div>
+                        <div class="text-muted modal-base-amt"><s>INR. {{ selectedPlan.baseAmt * 2 }}</s></div>
+                    </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal" (click)="onSubmitStep1(selectedPlan)">Buy Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <!-- Plan Details Modal Ends -->
 </form>
