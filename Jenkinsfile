@@ -5,7 +5,7 @@ pipeline {
     stages {
        stage("Prune Docker data") {
             steps {
-                   sh 'docker-compose down -d'
+                   sh 'docker-compose down'
                    sh 'docker system prune -a --volumes -f'
                   }
             }
